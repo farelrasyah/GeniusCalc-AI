@@ -1,16 +1,47 @@
-# geniuscalc_ai
 
-A new Flutter project.
+# 📊 GeniusCalc AI - Kalkulator Cerdas Berbasis AI  
 
-## Getting Started
+**GeniusCalc AI** adalah aplikasi kalkulator modern berbasis **Flutter** yang menggabungkan fitur perhitungan aritmatika dengan kecerdasan buatan. Dirancang dengan UI minimalis, responsif, dan mudah digunakan, aplikasi ini tidak hanya berfungsi sebagai kalkulator biasa, tetapi juga menawarkan fitur pintar untuk meningkatkan pengalaman pengguna.  
 
-This project is a starting point for a Flutter application.
+## ✨ Fitur Utama  
 
-A few resources to get you started if this is your first Flutter project:
+### 🔢 **Perhitungan Aritmatika Dasar**  
+- Mendukung operasi **penjumlahan (+), pengurangan (-), perkalian (*), dan pembagian (/)**.  
+- Input angka **0-9** dengan tampilan layar yang menampilkan hasil secara real-time.  
+- **Tombol `=`** untuk menampilkan hasil akhir.  
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### 🎯 **Manajemen Input & Error Handling**  
+- **Maksimal 8 digit angka** untuk input (melebihi batas akan diabaikan).  
+- **Tombol `C`** untuk menghapus angka terakhir dan **tombol `AC`** untuk menghapus semua input.  
+- **Pesan `ERR`** muncul jika hasil operasi melebihi batas tampilan.  
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### ⚡ **Fitur Tambahan**  
+- **Tombol `+/-`** untuk mengubah tanda angka.  
+- **Dukungan angka desimal** (hingga 3 tempat desimal).  
+- **Dark Mode & Tema Dinamis** berdasarkan preferensi sistem.  
+
+## 🤖 Fitur AI (Opsional)  
+- **AI-Powered Suggestion**: Menyediakan saran operasi berdasarkan pola input pengguna.  
+- **Prediksi Hasil & Auto-Correct**: Memprediksi operasi sebelum tombol `=` ditekan & menangani error seperti pembagian dengan nol.  
+- **Input Suara**: Memungkinkan pengguna menghitung dengan perintah suara seperti _"Lima tambah tujuh"_.  
+
+## 🛠 Teknologi yang Digunakan  
+- **Flutter (Dart) 🚀**  
+- **Provider / Riverpod** untuk manajemen state  
+- **Math Expressions Library** untuk perhitungan matematis  
+- **Speech-to-Text** untuk input suara  
+- **ML Kit / TensorFlow Lite (Opsional)** untuk fitur AI  
+
+## 🎨 Desain UI  
+- **Minimalis & Modern**, mirip kalkulator fisik  
+- **Smooth Animations** untuk pengalaman yang lebih interaktif  
+- **Responsif**, mendukung **smartphone & tablet**  
+
+## 💡 Mengapa GeniusCalc AI?  
+✅ Perhitungan cepat & akurat  
+✅ Tampilan modern dengan tema gelap/terang  
+✅ AI yang membuat pengalaman menghitung lebih cerdas  
+✅ Open-source & dapat dikembangkan lebih lanjut  
+
+🚀 **Mulai gunakan GeniusCalc AI dan buat perhitungan jadi lebih cerdas!**  
+
