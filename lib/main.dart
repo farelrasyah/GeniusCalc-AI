@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:geniuscalc_ai/core/constant/app_constants.dart';
 import 'package:geniuscalc_ai/core/theme/app_theme.dart';
 import 'package:geniuscalc_ai/features/calculator/screens/calculator_screen.dart';
+import 'package:geniuscalc_ai/widgets/game_app_bar.dart';
+import 'package:geniuscalc_ai/widgets/game_nav_bar.dart';
 
 void main() {
+  // Enable web platform with proper initialization
+  WidgetsFlutterBinding.ensureInitialized();
+  usePathUrlStrategy(); // Updated method for setting URL strategy
   runApp(const SmartCalcAI());
 }
 
@@ -31,63 +38,39 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Changed from _MyHomePageState
   int _currentIndex = 0;
   int _userLevel = 1;
   int _userXP = 0;
 
   final List<Widget> _screens = [
     const CalculatorScreen(),
-    // Add AI Assistant Screen here when implemented
-    // Add Profile/Settings Screen here when implemented
+    const Placeholder(), // Temporary placeholder for AI Assistant
+    const Placeholder(), // Temporary placeholder for Settings
   ];
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppConstants.appName),
-        actions: [
-          // XP and Level Display
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                const Icon(Icons.star, color: Colors.amber),
-                const SizedBox(width: 4),
-                Text(
-                  'Level $_userLevel',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(width: 8),
-                Text('XP: $_userXP/${AppConstants.levelUpXP}'),
-              ],
-            ),
-          ),
-        ],
+      backgroundColor: theme.colorScheme.background,
+      extendBody: true,
+      appBar: GameAppBar(
+        title: AppConstants.appName,
+        level: _userLevel,
+        xp: _userXP,
+        maxXP: AppConstants.levelUpXP,
       ),
-      body: _screens[_currentIndex],
-      bottomNavigationBar: NavigationBar(
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: _screens[_currentIndex],
+      ),
+      bottomNavigationBar: GameNavBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          HapticFeedback.selectionClick();
+          setState(() => _currentIndex = index);
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.calculate),
-            label: 'Calculator',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.chat_bubble),
-            label: 'AI Assistant',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
       ),
     );
   }
