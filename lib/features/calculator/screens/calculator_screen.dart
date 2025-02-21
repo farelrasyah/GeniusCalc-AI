@@ -363,15 +363,43 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                           AnimatedBuilder(
                             animation: _scaleAnimation,
                             builder: (context, child) {
-                              return Transform.scale(
-                                scale: _scaleAnimation.value,
-                                child: Text(
-                                  _result,
-                                  style: TextStyle(
-                                    fontSize: 56,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF495057),
-                                    letterSpacing: 2,
+                              return Container(
+                                constraints: BoxConstraints(
+                                  minHeight:
+                                      80, // Minimum height to prevent shrinking
+                                  minWidth: double.infinity,
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 15, vertical: 10),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Colors.white.withOpacity(0.95),
+                                      Colors.white.withOpacity(0.90),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.03),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: Transform.scale(
+                                  scale: _scaleAnimation.value,
+                                  child: Text(
+                                    _result,
+                                    style: TextStyle(
+                                      fontSize: 56,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF495057),
+                                      letterSpacing: 2,
+                                    ),
+                                    textAlign: TextAlign.right,
                                   ),
                                 ),
                               );
