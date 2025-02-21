@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../widgets/calculator_button.dart';
 import 'dart:ui';
+import 'dart:math';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({Key? key}) : super(key: key);
@@ -10,12 +11,17 @@ class CalculatorScreen extends StatefulWidget {
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   String _expression = '';
   String _result = '0';
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
+
+  String _currentNumber = '';
+  List<String> _operators = ['+', '-', '×', '÷', '%'];
+  bool _hasDecimalPoint = false;
+  bool _shouldResetInput = false;
 
   final List<String> buttons = [
     'C',
@@ -72,22 +78,209 @@ class _CalculatorScreenState extends State<CalculatorScreen>
 
   void _onButtonPressed(String value) {
     setState(() {
-      if (value == 'C') {
+      if (_shouldResetInput && !_operators.contains(value)) {
         _expression = '';
-        _result = '0';
-        _animationController.forward(from: 0.0);
-      } else if (value == '=') {
-        try {
-          // Implement calculation logic here
-          _animationController.forward(from: 0.0);
-        } catch (e) {
-          _result = 'Error';
-        }
-      } else {
-        _expression += value;
-        _animationController.forward(from: 0.0);
+        _shouldResetInput = false;
       }
+
+      switch (value) {
+        case 'C':
+          _clear();
+          break;
+        case 'DEL':
+          _delete();
+          break;
+        case '=':
+          _calculate();
+          break;
+        case '.':
+          _handleDecimalPoint();
+          break;
+        case '±':
+          _toggleSign();
+          break;
+        case '%':
+          _handlePercentage();
+          break;
+        default:
+          if (_operators.contains(value)) {
+            _handleOperator(value);
+          } else {
+            _handleNumber(value);
+          }
+      }
+      _animationController.forward(from: 0.0);
     });
+  }
+
+  void _clear() {
+    _expression = '';
+    _result = '0';
+    _currentNumber = '';
+    _hasDecimalPoint = false;
+    _shouldResetInput = false;
+  }
+
+  void _delete() {
+    if (_expression.isNotEmpty) {
+      String lastChar = _expression[_expression.length - 1];
+      if (lastChar == '.') {
+        _hasDecimalPoint = false;
+      }
+      _expression = _expression.substring(0, _expression.length - 1);
+      if (_expression.isEmpty) {
+        _result = '0';
+      } else {
+        _tryCalculate();
+      }
+    }
+  }
+
+  void _handleNumber(String number) {
+    _expression += number;
+    _currentNumber += number;
+    _tryCalculate();
+  }
+
+  void _handleDecimalPoint() {
+    if (!_hasDecimalPoint) {
+      if (_expression.isEmpty ||
+          _operators.contains(_expression[_expression.length - 1])) {
+        _expression += '0';
+      }
+      _expression += '.';
+      _currentNumber += '.';
+      _hasDecimalPoint = true;
+    }
+  }
+
+  void _handleOperator(String operator) {
+    if (_expression.isNotEmpty) {
+      String lastChar = _expression[_expression.length - 1];
+      if (_operators.contains(lastChar)) {
+        _expression =
+            _expression.substring(0, _expression.length - 1) + operator;
+      } else {
+        _expression += operator;
+      }
+      _currentNumber = '';
+      _hasDecimalPoint = false;
+    } else if (operator == '-' && _expression.isEmpty) {
+      _expression = operator;
+      _currentNumber = operator;
+    }
+  }
+
+  void _toggleSign() {
+    if (_expression.isNotEmpty) {
+      if (_expression[0] == '-') {
+        _expression = _expression.substring(1);
+      } else {
+        _expression = '-' + _expression;
+      }
+      _tryCalculate();
+    }
+  }
+
+  void _handlePercentage() {
+    if (_expression.isNotEmpty &&
+        !_operators.contains(_expression[_expression.length - 1])) {
+      try {
+        double number = double.parse(_currentNumber);
+        number = number / 100;
+        String newExpression = _expression.substring(
+            0, _expression.length - _currentNumber.length);
+        _expression = newExpression + number.toString();
+        _currentNumber = number.toString();
+        _tryCalculate();
+      } catch (e) {
+        _result = 'Error';
+      }
+    }
+  }
+
+  void _calculate() {
+    try {
+      _result = _evaluateExpression(_expression).toString();
+      _shouldResetInput = true;
+    } catch (e) {
+      _result = 'Error';
+    }
+  }
+
+  void _tryCalculate() {
+    try {
+      _result = _evaluateExpression(_expression).toString();
+    } catch (e) {
+      // Silently fail for partial expressions
+    }
+  }
+
+  double _evaluateExpression(String expression) {
+    if (expression.isEmpty) return 0;
+
+    // Replace × and ÷ with * and / for evaluation
+    expression = expression.replaceAll('×', '*').replaceAll('÷', '/');
+
+    // Handle parentheses and operator precedence
+    List<String> tokens = _tokenize(expression);
+    return _evaluateTokens(tokens);
+  }
+
+  List<String> _tokenize(String expression) {
+    List<String> tokens = [];
+    String number = '';
+
+    for (int i = 0; i < expression.length; i++) {
+      String char = expression[i];
+      if (char.contains(RegExp(r'[0-9.]'))) {
+        number += char;
+      } else {
+        if (number.isNotEmpty) {
+          tokens.add(number);
+          number = '';
+        }
+        tokens.add(char);
+      }
+    }
+    if (number.isNotEmpty) {
+      tokens.add(number);
+    }
+
+    return tokens;
+  }
+
+  double _evaluateTokens(List<String> tokens) {
+    // Handle multiplication and division first
+    for (int i = 1; i < tokens.length - 1; i += 2) {
+      if (tokens[i] == '*' || tokens[i] == '/') {
+        double a = double.parse(tokens[i - 1]);
+        double b = double.parse(tokens[i + 1]);
+        double result;
+        if (tokens[i] == '*') {
+          result = a * b;
+        } else {
+          if (b == 0) throw Exception('Division by zero');
+          result = a / b;
+        }
+        tokens[i - 1] = result.toString();
+        tokens.removeRange(i, i + 2);
+        i -= 2;
+      }
+    }
+
+    // Handle addition and subtraction
+    double result = double.parse(tokens[0]);
+    for (int i = 1; i < tokens.length - 1; i += 2) {
+      double b = double.parse(tokens[i + 1]);
+      if (tokens[i] == '+') {
+        result += b;
+      } else if (tokens[i] == '-') {
+        result -= b;
+      }
+    }
+
+    return result;
   }
 
   @override

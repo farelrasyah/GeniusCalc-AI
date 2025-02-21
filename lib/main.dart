@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:geniuscalc_ai/core/constant/app_constants.dart';
-import 'package:geniuscalc_ai/core/theme/app_theme.dart';
-import 'package:geniuscalc_ai/features/calculator/screens/calculator_screen.dart';
-import 'package:geniuscalc_ai/features/ai_assistant/screens/aiAssistantScreen.dart';
-import 'package:geniuscalc_ai/widgets/navbar.dart';
+import 'features/calculator/screens/calculator_screen.dart';
+import 'features/ai_assistant/screens/aiAssistantScreen.dart';
+import 'widgets/navbar.dart';
+import 'core/constant/app_constants.dart';
+import 'core/theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,21 +44,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  int _userLevel = 1;
-  int _userXP = 0;
 
   final List<Widget> _screens = [
     const CalculatorScreen(),
-    const AIAssistantScreen(), // Replace Placeholder with AIAssistantScreen
-  
+    const AIAssistantScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.background,
       extendBody: true,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
