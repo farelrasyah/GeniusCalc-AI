@@ -20,7 +20,7 @@
 - **Dukungan angka desimal** (hingga 3 tempat desimal).  
 - **Dark Mode & Tema Dinamis** berdasarkan preferensi sistem.  
 
-## 🤖 Fitur AI (Opsional)  
+## 🤖 Fitur AI 
 - **AI-Powered Suggestion**: Menyediakan saran operasi berdasarkan pola input pengguna.  
 - **Prediksi Hasil & Auto-Correct**: Memprediksi operasi sebelum tombol `=` ditekan & menangani error seperti pembagian dengan nol.  
 - **Input Suara**: Memungkinkan pengguna menghitung dengan perintah suara seperti _"Lima tambah tujuh"_.  
