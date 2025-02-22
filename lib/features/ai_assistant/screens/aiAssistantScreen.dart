@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:geniuscalc_ai/features/calculator/screens/calculator_Screen.dart';
+import '../services/gemini_service.dart';
 
 class AIAssistantScreen extends StatefulWidget {
   const AIAssistantScreen({Key? key}) : super(key: key);
@@ -11,6 +12,7 @@ class AIAssistantScreen extends StatefulWidget {
 }
 
 class _AIAssistantScreenState extends State<AIAssistantScreen> {
+  final GeminiService _geminiService = GeminiService();
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<ChatMessage> _messages = [];
@@ -95,8 +97,11 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     return ListView.builder(
       controller: _scrollController,
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      itemCount: _messages.length,
+      itemCount: _messages.length + (_isTyping ? 1 : 0),
       itemBuilder: (context, index) {
+        if (index == _messages.length) {
+          return _buildTypingIndicator();
+        }
         final message = _messages[index];
         return _buildChatBubble(message);
       },
@@ -232,30 +237,40 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     );
   }
 
-  void _sendMessage() {
+  void _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
 
+    final userMessage = _messageController.text;
     setState(() {
       _messages.add(ChatMessage(
-        text: _messageController.text,
+        text: userMessage,
         isUser: true,
       ));
       _messageController.clear();
       _isTyping = true;
     });
+    _scrollToBottom();
 
-    // Simulate AI response
-    Future.delayed(Duration(seconds: 1), () {
+    try {
+      final response = await _geminiService.generateResponse(userMessage);
       setState(() {
         _isTyping = false;
         _messages.add(ChatMessage(
-          text:
-              "This is a sample AI response. Replace with actual AI integration.",
+          text: response,
           isUser: false,
         ));
       });
       _scrollToBottom();
-    });
+    } catch (e) {
+      setState(() {
+        _isTyping = false;
+        _messages.add(ChatMessage(
+          text: "Sorry, I couldn't process your request. Please try again.",
+          isUser: false,
+        ));
+      });
+      _scrollToBottom();
+    }
   }
 
   void _scrollToBottom() {
@@ -263,6 +278,63 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
       _scrollController.position.maxScrollExtent,
       duration: Duration(milliseconds: 300),
       curve: Curves.easeOut,
+    );
+  }
+
+  // Add typing indicator
+  Widget _buildTypingIndicator() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          _buildAvatar(),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                _buildDot(0),
+                _buildDot(1),
+                _buildDot(2),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDot(int index) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 3),
+      height: 6,
+      width: 6,
+      decoration: BoxDecoration(
+        color: Color(0xFF495057),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: TweenAnimationBuilder(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+        builder: (context, value, child) {
+          return Transform.scale(
+            scale: 0.5 + (0.5 * value),
+            child: child,
+          );
+        },
+      ),
     );
   }
 
@@ -283,5 +355,3 @@ class ChatMessage {
     required this.isUser,
   });
 }
-
-

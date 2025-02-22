@@ -17,6 +17,8 @@ class _CalculatorScreenState extends State<CalculatorScreen>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
+  late Animation<double> _displayHeightAnimation;
+  late Animation<double> _displayOpacityAnimation;
 
   String _currentNumber = '';
   List<String> _operators = ['+', '-', '×', '÷', '%'];
@@ -63,17 +65,41 @@ class _CalculatorScreenState extends State<CalculatorScreen>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.98,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    ));
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeIn,
+    ));
+
+    _displayHeightAnimation = Tween<double>(
+      begin: 180,
+      end: 220,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutBack,
+    ));
+
+    _displayOpacityAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    ));
   }
 
   void _onButtonPressed(String value) {
@@ -303,114 +329,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
             // Display area with game-inspired design
             Expanded(
               flex: 2,
-              child: Container(
-                margin: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 20,
-                      offset: Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      padding: EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
-                          width: 1.5,
-                        ),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.white.withOpacity(0.9),
-                            Colors.white.withOpacity(0.8),
-                          ],
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          // Expression display with animation
-                          AnimatedBuilder(
-                            animation: _fadeAnimation,
-                            builder: (context, child) {
-                              return Opacity(
-                                opacity: _fadeAnimation.value,
-                                child: Text(
-                                  _expression,
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    color: Color(0xFF6C757D),
-                                    fontWeight: FontWeight.w300,
-                                    letterSpacing: 1.2,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          SizedBox(height: 12),
-                          // Result display with animation
-                          AnimatedBuilder(
-                            animation: _scaleAnimation,
-                            builder: (context, child) {
-                              return Container(
-                                constraints: BoxConstraints(
-                                  minHeight:
-                                      80, // Minimum height to prevent shrinking
-                                  minWidth: double.infinity,
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 15, vertical: 10),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Colors.white.withOpacity(0.95),
-                                      Colors.white.withOpacity(0.90),
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.03),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Transform.scale(
-                                  scale: _scaleAnimation.value,
-                                  child: Text(
-                                    _result,
-                                    style: TextStyle(
-                                      fontSize: 56,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF495057),
-                                      letterSpacing: 2,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              child: _buildDisplayArea(),
             ),
             // Buttons area with game-inspired design
             Expanded(
@@ -446,6 +365,139 @@ class _CalculatorScreenState extends State<CalculatorScreen>
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDisplayArea() {
+    return Container(
+      height: _displayHeightAnimation.value,
+      margin: const EdgeInsets.fromLTRB(20, 40, 20, 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+            spreadRadius: -5,
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.7),
+            blurRadius: 20,
+            offset: const Offset(-5, -5),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: Container(
+            padding: const EdgeInsets.all(25),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 1.5,
+              ),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withOpacity(0.95),
+                  Colors.white.withOpacity(0.85),
+                ],
+                stops: const [0.1, 0.9],
+              ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                // Expression display with enhanced animation
+                AnimatedBuilder(
+                  animation: Listenable.merge(
+                      [_fadeAnimation, _displayOpacityAnimation]),
+                  builder: (context, child) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8F9FA).withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Text(
+                        _expression.isEmpty ? '0' : _expression,
+                        style: TextStyle(
+                          fontSize: 28,
+                          color: const Color(0xFF6C757D)
+                              .withOpacity(_displayOpacityAnimation.value),
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: 1.2,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 15),
+                // Result display with enhanced animation
+                AnimatedBuilder(
+                  animation: Listenable.merge(
+                      [_scaleAnimation, _displayOpacityAnimation]),
+                  builder: (context, child) {
+                    return Container(
+                      constraints: const BoxConstraints(
+                        minHeight: 90,
+                        minWidth: double.infinity,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withOpacity(0.98),
+                            Colors.white.withOpacity(0.95),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.03),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5),
+                            spreadRadius: -2,
+                          ),
+                        ],
+                      ),
+                      child: Transform.scale(
+                        scale: _scaleAnimation.value,
+                        child: Text(
+                          _result,
+                          style: TextStyle(
+                            fontSize: _result.length > 8 ? 48 : 64,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF495057)
+                                .withOpacity(_displayOpacityAnimation.value),
+                            letterSpacing: 2,
+                            height: 1.2,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
