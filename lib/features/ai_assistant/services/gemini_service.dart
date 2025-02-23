@@ -23,7 +23,10 @@ class GeminiService {
               'parts': [
                 {
                   'text': '''You are a helpful math assistant. 
-              Focus on providing clear, step-by-step mathematical explanations.
+              Focus on providing clear mathematical explanations.
+              Use numbers instead of asterisks for steps (1., 2., etc).
+              Format the response to be clean and readable.
+              Keep explanations concise and friendly.
               Question: $prompt'''
                 }
               ]
@@ -58,7 +61,18 @@ class GeminiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['candidates'][0]['content']['parts'][0]['text'];
+        String rawResponse =
+            data['candidates'][0]['content']['parts'][0]['text'];
+
+        // Clean up the response text
+        rawResponse = rawResponse
+            .replaceAll('**', '') // Remove markdown bold syntax
+            .replaceAll('*', '') // Remove any remaining asterisks
+            .replaceAll('Step ', 'Step ') // Ensure consistent step formatting
+            .replaceAll(RegExp(r'\n\s*\n'), '\n') // Remove extra newlines
+            .trim();
+
+        return rawResponse;
       } else {
         print('Error response: ${response.body}');
         throw Exception('API Error: ${response.statusCode}');
