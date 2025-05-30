@@ -59,13 +59,13 @@ class _HomeScreenState extends State<HomeScreen> {
         duration: const Duration(milliseconds: 300),
         child: _screens[_currentIndex],
       ),
-      bottomNavigationBar: GameNavBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          HapticFeedback.selectionClick();
-          setState(() => _currentIndex = index);
-        },
-      ),
+      // bottomNavigationBar: GameNavBar(
+      //   selectedIndex: _currentIndex,
+      //   onDestinationSelected: (index) {
+      //     HapticFeedback.selectionClick();
+      //     setState(() => _currentIndex = index);
+      //   },
+      // ),
     );
   }
 }
